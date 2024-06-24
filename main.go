@@ -43,7 +43,7 @@ func main() {
 }
 
 func installMkcert() error {
-	cmd := exec.Command("tools/mkcert", "-install")
+	cmd := exec.Command("mkcert", "-install")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("error running mkcert -install: %v", err)
 	}
