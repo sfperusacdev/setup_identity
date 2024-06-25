@@ -19,10 +19,15 @@ func printError(err string) {
 }
 
 func main() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		printError(err.Error())
+	}
 	basepath, err := osext.ExecutableFolder()
 	if err != nil {
 		printError(err.Error())
 	}
+	fmt.Println("home:", home)
 	fmt.Println("base path:", basepath)
 	if err := utils.AddToPath(path.Join(basepath, "tools")); err != nil {
 		printError(err.Error())
