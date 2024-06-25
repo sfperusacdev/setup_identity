@@ -32,23 +32,23 @@ func main() {
 	if err := utils.AddToPath(path.Join(basepath, "tools")); err != nil {
 		printError(err.Error())
 	}
-	fmt.Println("tools added to PATH ✅")
+	fmt.Println("\t-tools added to PATH ✅")
 	var exepath = path.Join(basepath, "sf_updates_manager.exe")
 	if err := utils.AddStartupEntry("SF Update Manager", exepath); err != nil {
 		printError(err.Error())
 	}
-	fmt.Println("sf_updates_manager.exe added to Start ✅")
-	if err := installMkcert(); err != nil {
+	fmt.Println("\t-sf_updates_manager.exe added to Start ✅")
+	if err := installMkcert(basepath); err != nil {
 		printError(err.Error())
 	}
-	fmt.Println("mkcert certificates installed successfully ✅")
+	fmt.Println("\t-mkcert certificates installed successfully ✅")
 	fmt.Println("Installation completed 👍")
 	fmt.Println("Press Enter ...")
 	bufio.NewScanner(os.Stdin).Scan()
 }
 
-func installMkcert() error {
-	cmd := exec.Command("mkcert", "-install")
+func installMkcert(basePath string) error {
+	cmd := exec.Command(path.Join(basePath, "tools/mkcert"), "-install")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("error running mkcert -install: %v", err)
 	}
