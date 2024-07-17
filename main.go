@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
+
+	"path/filepath"
 	"setup/utils"
 
 	"github.com/kardianos/osext"
@@ -29,11 +30,11 @@ func main() {
 	}
 	fmt.Println("home:", home)
 	fmt.Println("base path:", basepath)
-	if err := utils.AddToPath(path.Join(basepath, "tools")); err != nil {
+	if err := utils.AddToPath(filepath.Join(basepath, "tools")); err != nil {
 		printError(err.Error())
 	}
 	fmt.Println("\t-tools added to PATH ✅")
-	var exepath = path.Join(basepath, "sf_updates_manager.exe")
+	var exepath = filepath.Join(basepath, "sf_updates_manager.exe")
 	if err := utils.AddStartupEntry("SF Update Manager", exepath); err != nil {
 		printError(err.Error())
 	}
@@ -48,7 +49,7 @@ func main() {
 }
 
 func installMkcert(basePath string) error {
-	cmd := exec.Command(path.Join(basePath, "tools/mkcert"), "-install")
+	cmd := exec.Command(filepath.Join(basePath, "tools/mkcert"), "-install")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("error running mkcert -install: %v", err)
 	}
