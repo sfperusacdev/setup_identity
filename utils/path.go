@@ -26,7 +26,7 @@ func AddToPath(newPath string) error {
 		return fmt.Errorf("error reading PATH value: %v", err)
 	}
 
-	newPath = fmt.Sprintf("%s;%s", currentPath, newPath)
+	newPath = fmt.Sprintf("%s;%s", newPath, currentPath)
 	err = key.SetStringValue("PATH", newPath)
 	if err != nil {
 		return fmt.Errorf("error updating PATH value: %v", err)

@@ -30,6 +30,7 @@ func main() {
 	}
 	fmt.Println("home:", home)
 	fmt.Println("base path:", basepath)
+
 	if err := utils.AddToPath(filepath.Join(basepath, "tools")); err != nil {
 		printError(err.Error())
 	}
