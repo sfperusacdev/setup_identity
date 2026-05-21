@@ -1,9 +1,9 @@
 manifest:
-	@rsrc.exe -manifest setup.exe.manifest -o setup.exe.syso
+	@go run github.com/akavel/rsrc@v0.10.2 -manifest setup.exe.manifest -o setup.exe.syso
 
 build: manifest
-	@go build -o setup.exe .
+	@mkdir -p build
+	@GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o build/setup.exe .
 
-run:
-	@go build -o setup.exe .
-	@setup.exe
+run: build
+	@./build/setup.exe

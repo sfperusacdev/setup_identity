@@ -8,6 +8,7 @@ import (
 
 	"path/filepath"
 	"setup/utils"
+	"strings"
 
 	"github.com/kardianos/osext"
 )
@@ -20,26 +21,48 @@ func printError(err string) {
 }
 
 func main() {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		printError(err.Error())
-	}
+	const defaultStartupExecutable = "sf_manager.exe"
+
 	basepath, err := osext.ExecutableFolder()
 	if err != nil {
 		printError(err.Error())
 	}
-	fmt.Println("home:", home)
 	fmt.Println("base path:", basepath)
 
-	if err := utils.AddToPath(filepath.Join(basepath, "tools")); err != nil {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		printError(err.Error())
+	}
+	userInstall := pathInside(basepath, home)
+
+	if err := utils.AddToPath(filepath.Join(basepath, "tools"), userInstall); err != nil {
 		printError(err.Error())
 	}
 	fmt.Println("\t-tools added to PATH ✅")
-	var exepath = filepath.Join(basepath, "sf_updates_manager.exe")
-	if err := utils.AddStartupEntry("SF Update Manager", exepath); err != nil {
+	exepath := defaultStartupExecutable
+	if len(os.Args) > 1 {
+		exepath = os.Args[1]
+	}
+	if !filepath.IsAbs(exepath) {
+		exepath = filepath.Join(basepath, exepath)
+	}
+	if err := utils.AddStartupEntry("SF Update Manager", exepath, userInstall); err != nil {
 		printError(err.Error())
 	}
-	fmt.Println("\t-sf_updates_manager.exe added to Start ✅")
+	fmt.Printf("\t-%s added to Start ✅\n", exepath)
+	if !userInstall {
+		caRoot := filepath.Join(basepath, ".CA")
+		if err := os.MkdirAll(caRoot, 0755); err != nil {
+			printError(err.Error())
+		}
+		if err := os.Setenv("CAROOT", caRoot); err != nil {
+			printError(err.Error())
+		}
+		if err := utils.SetSystemEnv("CAROOT", caRoot); err != nil {
+			printError(err.Error())
+		}
+		fmt.Printf("\t-CAROOT set to %s ✅\n", caRoot)
+	}
 	if err := installMkcert(basepath); err != nil {
 		printError(err.Error())
 	}
@@ -49,8 +72,18 @@ func main() {
 	bufio.NewScanner(os.Stdin).Scan()
 }
 
+func pathInside(path, base string) bool {
+	rel, err := filepath.Rel(base, path)
+	if err != nil {
+		return false
+	}
+	return rel == "." ||
+		(!filepath.IsAbs(rel) && rel != ".." &&
+			!strings.HasPrefix(rel, ".."+string(filepath.Separator)))
+}
+
 func installMkcert(basePath string) error {
-	cmd := exec.Command(filepath.Join(basePath, "tools/mkcert"), "-install")
+	cmd := exec.Command(filepath.Join(basePath, "tools", "mkcert.exe"), "-install")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("error running mkcert -install: %v", err)
 	}

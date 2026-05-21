@@ -6,16 +6,23 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-func AddStartupEntry(name, executablePath string) error {
-	key, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Run`, registry.SET_VALUE)
+func AddStartupEntry(name, executablePath string, userInstall bool) error {
+	root := registry.LOCAL_MACHINE
+	scope := "machine"
+	if userInstall {
+		root = registry.CURRENT_USER
+		scope = "user"
+	}
+
+	key, err := registry.OpenKey(root, `Software\Microsoft\Windows\CurrentVersion\Run`, registry.SET_VALUE)
 	if err != nil {
-		return fmt.Errorf("failed to open registry key: %v", err)
+		return fmt.Errorf("failed to open %s startup registry key: %v", scope, err)
 	}
 	defer key.Close()
-	// Establecer el valor del registro para la entrada de inicio automático
+
 	err = key.SetStringValue(name, executablePath)
 	if err != nil {
-		return fmt.Errorf("failed to set registry value: %v", err)
+		return fmt.Errorf("failed to set %s startup registry value: %v", scope, err)
 	}
 	return nil
 }
